@@ -11,6 +11,7 @@ import streamlit as st
 from mysql.connector import Error, connect
 from PIL import Image
 from snoop import pp
+from timeline import db_items
 
 
 def type_watch(source, value):
@@ -36,9 +37,9 @@ def tag_lst():
             database="notes",
             use_pure=True,
         )
-        # As were using the Pandas version of MySQL connection, there were problems wiuth this query, as it
+        # As we're using the Pandas version of MySQL connection, there were problems wiuth this query, as it
         # is, probably lazy loaded, and the selection/union operations in different columns, was making it
-        # that it was loosing results. The solution is to add 'buffered=true' to the 'cur' line.
+        # loose results. The solution is to add 'buffered=true' to the 'cur' line.
         cur = conn.cursor(buffered=True)
         query = "SELECT k1 FROM notes UNION SELECT k2 FROM notes UNION SELECT k3 FROM notes"
         cur.execute(query)
@@ -57,7 +58,7 @@ def selecttags():
     """
     We produce a list of tags. User chooses one, we'll search the db
     for posts that contain it. Present the results and if the user so
-    wishes, he can select one the ntid's and we'll show him the note.
+    wishes, he can select one, and we'll show him the note's text.
     """
 
     tags_dataframe = tag_lst()
@@ -68,11 +69,12 @@ def selecttags():
     def tag_option_callback():
         st.write(st.session_state.tag_choice)
 
-    # This callback gathers the information about what tag the user selects. The 'key' option is needed to access
+    # This callback gathers the information about what tag the user selected. The 'key' option is needed to access
     # the session state. 'Index' is Pandas' id for the tag entry, that's preselected,  and visible on the selectbox.
+    st.header(":violet[Tag Selection]")
     tag_option = st.selectbox(
-        "Choose a keyword and see what posts are tagged with it.",
-        tags_dataframe,
+        label="Choose a keyword and see what posts are tagged with it.",
+        options=tags_dataframe,
         key="tag_choice",
         index=1,
     )
@@ -150,7 +152,15 @@ def selecttags():
 
     # Finally we open the note image in the Streamlit site.
     img = Image.open(f"/home/mic/python/notes/notes/notes/{chosen_ntid}.gif")
+    st.header(":violet[Note Text]")
     st.image(img)
+
+    st.divider()
+
+    st.header(":violet[Tag Timeline]", help="Timeline of posts that contain this tag.")
+    db_items(tag_option)
+
+    return tag_option
 
 
 if __name__ == "__main__":

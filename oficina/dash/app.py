@@ -4,7 +4,7 @@ Module Docstring
 import pandas as pd
 import plotly.express as px
 import snoop
-from dash import Dash, Input, Output, callback, dcc, html
+from dash import Dash, dash_table, dcc, html
 from snoop import pp
 
 
@@ -15,25 +15,19 @@ def type_watch(source, value):
 snoop.install(watch_extras=[type_watch])
 
 
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv"
-)
-
 app = Dash(__name__)
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv"
+)
+# App layout
 app.layout = html.Div(
     [
-        html.H1(children="A Very Nice Title", style={"textAlign": "center"}),
-        dcc.Dropdown(df.country.unique(), "Canada", id="dropdown-selection"),
-        dcc.Graph(id="graph-content"),
+        html.Div(children="My First App with Data and a Graph"),
+        dash_table.DataTable(data=df.to_dict("records"), page_size=10),
+        dcc.Graph(figure=px.histogram(df, x="continent", y="lifeExp", histfunc="avg")),
     ]
 )
 
-
-@callback(Output("graph-content", "figure"), Input("dropdown-selection", "value"))
-def update_graph(value):
-    dff = df[df.country == value]
-    return px.line(dff, x="year", y="pop")
-
-
+# Run the app
 if __name__ == "__main__":
     app.run_server(debug=True)

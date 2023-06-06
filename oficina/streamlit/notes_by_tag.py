@@ -160,7 +160,7 @@ def selecttags():
     st.header(":violet[Tag Timeline]", help="Timeline of posts that contain this tag.")
     db_items(tag_option)
 
-    return tag_option
+    st.divider()
 
 
 if __name__ == "__main__":

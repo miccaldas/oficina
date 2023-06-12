@@ -46,6 +46,9 @@ def db_items(tag_option):
     dataframe_to_dict(td)
 
 
+db_items("python")
+
+
 # @snoop
 def dataframe_to_dict(td):
     """
